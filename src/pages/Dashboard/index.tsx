@@ -1,20 +1,47 @@
-import React from 'react';
+import React, { useState, FormEvent } from 'react';
 
 import { FiChevronRight } from 'react-icons/fi';
+
+import api from '../../services/api';
 
 import logoImg from '../../assets/logo.svg';
 
 import { Title, Form, Repositories } from './styles';
 
+interface Repository {
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
+
 const Dashboard: React.FC = () => {
+  const [newRepo, setNewRepo] = useState('');
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  async function handleAddRepository(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    const response = await api.get<Repository>(`repos/${newRepo}`)
+    console.log(response.data);
+
+    const repository = response.data
+
+    setRepositories([...repositories, repository]);
+    setNewRepo('')
+  }
+
   return (
     <>
       <img src={logoImg} alt="GitHub Explorer" />
       <Title>Explore diversos repositórios no GitHub</Title>
 
-      <Form>
+      <Form onSubmit={handleAddRepository}>
         <input
-          type="text"
+          value={newRepo}
+          onChange={e => setNewRepo(e.target.value)}
           placeholder="Digite aqui o seu melhor repositório!"
         />
         <button type="submit"> Pesquisar </button>
@@ -24,27 +51,32 @@ const Dashboard: React.FC = () => {
         <a href="teste">
           <img
             src="https://avatars1.githubusercontent.com/u/11447780?s=460&u=cb4370914fa15619100f47aee5c9b53e17a36cae&v=4"
-            alt="GitHub Explorer"
+            alt="Vinicius Imai"
           />
           <div>
-            <strong>Vimai asd</strong>
-            <p> testestest </p>
+            <strong>Vimai/Projeto-React</strong>
+            <p>Repositório do Vinicius imai</p>
           </div>
 
           <FiChevronRight size={20} />
         </a>
-        <a href="teste">
+
+        {repositories.map(repository => (
+        <a key={repository.full_name} href="teste">
           <img
-            src="https://avatars1.githubusercontent.com/u/11447780?s=460&u=cb4370914fa15619100f47aee5c9b53e17a36cae&v=4"
-            alt="GitHub Explorer"
+            src={repository.owner.avatar_url}
+            alt={repository.owner.login}
           />
           <div>
-            <strong>Vimai asd</strong>
-            <p> testestest </p>
+            <strong>{repository.full_name}</strong>
+            <p>{repository.description}</p>
           </div>
 
           <FiChevronRight size={20} />
         </a>
+      ))}
+
+
       </Repositories>
     </>
   );
