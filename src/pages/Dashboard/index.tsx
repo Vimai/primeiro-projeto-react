@@ -75,21 +75,21 @@ const Dashboard: React.FC = () => {
 
 
       <Repositories>
-        <Link to={`/repositories/repository.full_name`}>
+        <Link to={`/repositories/Vimai/primeiro-projeto-react`}>
           <img
             src="https://avatars1.githubusercontent.com/u/11447780?s=460&u=cb4370914fa15619100f47aee5c9b53e17a36cae&v=4"
             alt="Vinicius Imai"
           />
           <div>
-            <strong>Vimai/Projeto-React</strong>
-            <p>Repositório do Vinicius imai</p>
+            <strong>Vimai/primeiro-projeto-react</strong>
+            <p>Primeiro projeto usando reactJS</p>
           </div>
 
           <FiChevronRight size={20} />
         </Link>
 
         {repositories.map(repository => (
-        <Link key={repository.full_name} to={`/repositories/repository.full_name`}>
+        <Link key={repository.full_name} to={`/repositories/${repository.full_name}`}>
           <img
             src={repository.owner.avatar_url}
             alt={repository.owner.login}
