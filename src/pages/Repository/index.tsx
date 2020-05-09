@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouteMatch, Link } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+
+import api from '../../services/api';
 
 import logoImg from '../../assets/logo.svg';
 
@@ -11,9 +13,43 @@ interface RepositoryParams {
   repository: string;
 }
 
+interface Repository {
+  full_name: string;
+  description: string;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
+interface Issue {
+  id: number;
+  title: string;
+  html_url: string;
+  user: {
+    login: string;
+  };
+}
+
+
 const Repository: React.FC = () => {
+  const [repository, setrepository] = useState<Repository | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
   const { params } = useRouteMatch<RepositoryParams>()
-{/* <h1> Repository: {params.repository} </h1> */}
+
+  useEffect(() => {
+    api.get(`repos/${params.repository}`).then((response) => {
+      setrepository(response.data);
+    })
+
+    api.get(`repos/${params.repository}/issues`).then((response) => {
+      setIssues(response.data);
+    })
+  }, [params.repository])
+
   return (
     <>
       <Header>
@@ -21,41 +57,46 @@ const Repository: React.FC = () => {
         <Link to="/"> <FiChevronLeft size={18} /> Voltar</Link>
       </Header>
 
-      <RepositoryInfo>
+      {repository && (
+        <RepositoryInfo>
         <header>
         <img
-            src="https://avatars1.githubusercontent.com/u/11447780?s=460&u=cb4370914fa15619100f47aee5c9b53e17a36cae&v=4"
-            alt="Vinicius Imai"
+            src={repository.owner.avatar_url}
+            alt={repository.owner.login}
           />
           <div>
-            <strong>Vimai</strong>
-            <p>Teste de Repo</p>
+            <strong>{repository.full_name}</strong>
+            <p>{repository.description}</p>
           </div>
         </header>
         <ul>
           <li>
-            <strong>321</strong>
+            <strong>{repository.stargazers_count}</strong>
             <span>Stars</span>
           </li>
           <li>
-            <strong>2</strong>
+            <strong>{repository.forks_count}</strong>
             <span>Forks</span>
           </li>
           <li>
-            <strong>12</strong>
+            <strong>{repository.open_issues_count}</strong>
             <span>Issues Abertas</span>
           </li>
         </ul>
       </RepositoryInfo>
 
+      )}
+
       <Issues>
-        <Link to={`/repositories/repository.full_name`}>
+        {issues.map(issue => (
+          <a key={ issue.id } href={ issue.html_url}>
           <div>
-            <strong>Vimai/Projeto-React</strong>
-            <p>Repositório do Vinicius imai</p>
+            <strong>{issue.title}</strong>
+            <p>{issue.user.login}</p>
           </div>
           <FiChevronRight size={20} />
-        </Link>
+        </a>
+      ))}
       </Issues>
     </>
   );
